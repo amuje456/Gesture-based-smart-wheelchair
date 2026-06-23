@@ -28,7 +28,7 @@ void setup() {
 
 void loop() {
 
-  // Read accelerometer
+  // Read accelerometer values
   Wire.beginTransmission(0x68);
   Wire.write(0x3B);
   Wire.endTransmission(false);
@@ -40,23 +40,44 @@ void loop() {
 
   char msg[4] = "";
 
-  if (ax > 12000)
+  // Emergency Stop Threshold
+  if (ax > 13000 || ax < -13000 ||
+      ay > 13000 || ay < -13000)
+  {
+    strcpy(msg, "STP");
+  }
+
+  // Normal Gesture Threshold
+  else if (ax > 6000)
+  {
     strcpy(msg, "+X");
-  else if (ax < -12000)
+  }
+  else if (ax < -6000)
+  {
     strcpy(msg, "-X");
-  else if (ay > 12000)
+  }
+  else if (ay > 6000)
+  {
     strcpy(msg, "+Y");
-  else if (ay < -12000)
+  }
+  else if (ay < -6000)
+  {
     strcpy(msg, "-Y");
-  else if (az > 12000)
-    strcpy(msg, "+Z");
-  else if (az < -12000)
-    strcpy(msg, "-Z");
+  }
+
+  // Neutral Position
   else
+  {
     strcpy(msg, "---");
+  }
 
   radio.write(msg, sizeof(msg));
 
+  Serial.print("AX: ");
+  Serial.print(ax);
+  Serial.print(" AY: ");
+  Serial.print(ay);
+  Serial.print(" -> Command: ");
   Serial.println(msg);
 
   delay(200);
