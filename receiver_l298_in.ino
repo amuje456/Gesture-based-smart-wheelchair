@@ -5,7 +5,7 @@
 RF24 radio(9, 10);   // CE, CSN
 const byte address[6] = "00001";
 
-char text[10];
+char text[4];
 
 // L298N pins
 #define IN1 2
@@ -37,7 +37,6 @@ void backward() {
 }
 
 void leftTurn() {
-  // Right side motors only
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, LOW);
 
@@ -46,7 +45,6 @@ void leftTurn() {
 }
 
 void rightTurn() {
-  // Left side motors only
   digitalWrite(IN1, HIGH);
   digitalWrite(IN2, LOW);
 
@@ -69,7 +67,7 @@ void setup() {
   radio.openReadingPipe(0, address);
   radio.startListening();
 
-  Serial.println("RC Car Ready");
+  Serial.println("Wheelchair Receiver Ready");
 }
 
 void loop() {
@@ -91,19 +89,26 @@ void loop() {
       backward();
     }
 
-    else if (strcmp(text, "+Y") == 0) {
+    else if (strcmp(text, "-Y") == 0) {
       leftTurn();
     }
 
-    else if (strcmp(text, "-Y") == 0) {
+    else if (strcmp(text, "+Y") == 0) {
       rightTurn();
     }
 
-    else if (strcmp(text, "+Z") == 0) {
+    // Neutral Head Position
+    else if (strcmp(text, "---") == 0) {
       stopMotors();
     }
 
-    else if (strcmp(text, "-Z") == 0) {
+    // Emergency Stop
+    else if (strcmp(text, "STP") == 0) {
+      stopMotors();
+      Serial.println("EMERGENCY STOP");
+    }
+
+    else {
       stopMotors();
     }
   }
